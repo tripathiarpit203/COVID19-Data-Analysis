@@ -73,6 +73,7 @@ WHERE
     continent IS NOT NULL
 
 
+--CTE USE
 
 with PopvsVac (continent, location, date, population, new_vaccinations, RollingPeopleVaccinated)
 as 
@@ -88,3 +89,44 @@ join PortfolioProjects..CovidVaccination vac
 )
 select *, (RollingPeopleVaccinated*100/population) as PovVsVacPercent
 from PopvsVac
+
+
+
+
+--TEMP TABLE
+
+CREATE table #PercentPopulationVaccinated
+(continent nvarchar(244),
+location nvarchar(244),
+date datetime,
+population numeric,
+new_vaccinations numeric,
+RollingPeopleVaccinated numeric
+)
+
+
+Insert into #PercentPopulationVaccinated
+select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, sum(cast(vac.new_vaccinations as bigint)) over (partition by dea.location order by dea.location , dea.date)  as RollingPeopleVaccinated
+from PortfolioProjects..CovidDeaths dea
+join PortfolioProjects..CovidVaccination vac
+	on dea.location = vac.location 
+	and dea.date = vac.date
+where dea.continent is not null
+	
+
+select *, (RollingPeopleVaccinated*100/population) as PovVsVacPercent
+from #PercentPopulationVaccinated
+
+
+
+--creating view
+
+create view PercentPopulationVaccinated  as
+select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, sum(cast(vac.new_vaccinations as bigint)) over (partition by dea.location order by dea.location , dea.date)  as RollingPeopleVaccinated
+from PortfolioProjects..CovidDeaths dea
+join PortfolioProjects..CovidVaccination vac
+	on dea.location = vac.location 
+	and dea.date = vac.date
+	where dea.continent is not null
