@@ -1,2 +1,2 @@
 # CovidReport
- Mini Project to analyse data related to Covid cases, vaccination, spread rate and other aspects.
+ Mini Project to analyse data from @worldindata related to Covid cases, vaccination, spread rate and other aspects.
